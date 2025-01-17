@@ -1,31 +1,31 @@
 import os
-import firebase_admin
-from firebase_admin import credentials, auth
-from dotenv import load_dotenv
+from firebase_admin import credentials, initialize_app
+import logging
 
-load_dotenv()
+# Get environment variables
+private_key = os.getenv('FIREBASE_PRIVATE_KEY')
+if private_key:
+    # Replace literal \n with actual newlines
+    private_key = private_key.replace('\\n', '\n')
 
 try:
-    # Firebase Admin SDK 초기화
     cred = credentials.Certificate({
         "type": "service_account",
         "project_id": os.getenv('FIREBASE_PROJECT_ID'),
-        "private_key": os.getenv('FIREBASE_PRIVATE_KEY', '').replace('\\n', '\n') if os.getenv('FIREBASE_PRIVATE_KEY') else '',
+        "private_key": private_key,
         "client_email": os.getenv('FIREBASE_CLIENT_EMAIL'),
         "token_uri": "https://oauth2.googleapis.com/token",
         "auth_uri": "https://accounts.google.com/o/oauth2/auth",
         "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_x509_cert_url": os.getenv('FIREBASE_CLIENT_X509_CERT_URL')
     })
     
-    # 이미 초기화되었는지 확인
-    if not firebase_admin._apps:
-        app = firebase_admin.initialize_app(cred)
-    else:
-        app = firebase_admin.get_app()
-        
+    app = initialize_app(cred)
+    logging.info("Firebase initialized successfully")
 except Exception as e:
-    print(f"Firebase initialization error: {str(e)}")
-    raise
+    logging.error(f"Error initializing Firebase: {str(e)}")
+    # Don't raise the exception, just log it
+    app = None
 
 async def verify_firebase_token(token: str):
     try:
