@@ -8,4 +8,10 @@ services:
       - key: PYTHON_VERSION
         value: 3.11.0
       - key: PORT
-        value: 8000 
+        value: 8000
+      - key: FIREBASE_PROJECT_ID
+        value: dbhive-5a328
+      - key: FIREBASE_PRIVATE_KEY
+        sync: false
+      - key: FIREBASE_CLIENT_EMAIL
+        sync: false 
