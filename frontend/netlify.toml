@@ -1,9 +1,6 @@
 [build]
   command = "npm run build"
-  publish = ".next"
-
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
+  publish = "out"
 
 [build.environment]
   NEXT_PUBLIC_BACKEND_URL = "https://dbhive-api.onrender.com"
@@ -16,8 +13,9 @@
 
 [[redirects]]
   from = "/*"
-  to = "/.netlify/functions/next"
+  to = "/index.html"
   status = 200
+  force = true
 
 [functions]
   external_node_modules = ["@netlify/plugin-nextjs"] 
