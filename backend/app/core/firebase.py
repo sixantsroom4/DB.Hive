@@ -28,8 +28,14 @@ if not all([project_id, private_key, client_email]):
     app = None
 else:
     try:
-        # Replace literal \n with actual newlines in private key
-        private_key = private_key.replace('\\n', '\n')
+        # Clean and format private key
+        private_key = private_key.strip()
+        if private_key.startswith('"') and private_key.endswith('"'):
+            private_key = private_key[1:-1]
+        if not private_key.startswith('-----BEGIN PRIVATE KEY-----'):
+            private_key = '-----BEGIN PRIVATE KEY-----\n' + private_key
+        if not private_key.endswith('-----END PRIVATE KEY-----'):
+            private_key = private_key + '\n-----END PRIVATE KEY-----'
         
         logger.info(f"Initializing Firebase with project ID: {project_id}")
         logger.info(f"Using client email: {client_email}")
