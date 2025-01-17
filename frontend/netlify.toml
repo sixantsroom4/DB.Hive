@@ -16,6 +16,8 @@
 
 [[redirects]]
   from = "/*"
-  to = "/index.html"
+  to = "/.netlify/functions/next"
   status = 200
-  force = true 
+
+[functions]
+  external_node_modules = ["@netlify/plugin-nextjs"] 
