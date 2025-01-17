@@ -2,8 +2,10 @@ from fastapi import APIRouter, HTTPException, Header, Depends
 from typing import Optional
 from pydantic import BaseModel
 from ...core.firebase import verify_token, create_or_update_user_profile, get_user_profile
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 router = APIRouter()
+security = HTTPBearer()
 
 class UserProfile(BaseModel):
     name: str
@@ -26,21 +28,17 @@ async def get_current_user(authorization: str = Header(None)):
         raise HTTPException(status_code=401, detail=str(e))
 
 @router.post("/verify-token")
-async def verify_auth_token(authorization: str = Header(None)):
-    """
-    Firebase ID 토큰을 검증합니다.
-    """
+async def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
     try:
-        user = await get_current_user(authorization)
-        profile = get_user_profile(user["uid"])
-        return {
-            "user": {
-                **user,
-                "profile": profile
-            }
-        }
+        token = credentials.credentials
+        # Firebase 토큰 검증
+        decoded_token = await verify_firebase_token(token)
+        return {"message": "Token verified", "uid": decoded_token["uid"]}
     except Exception as e:
-        raise HTTPException(status_code=401, detail=str(e))
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid authentication credentials"
+        )
 
 @router.put("/profile")
 async def update_profile(

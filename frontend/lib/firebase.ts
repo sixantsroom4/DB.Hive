@@ -10,8 +10,11 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 }
 
-// Firebase 초기화
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
+// Firebase가 이미 초기화되었는지 확인
+let app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
 const auth = getAuth(app)
+
+// GitHub 인증을 위한 설정
+auth.useDeviceLanguage() // 브라우저 언어 설정 사용
 
 export { auth } 

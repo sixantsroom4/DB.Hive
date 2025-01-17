@@ -14,6 +14,10 @@ import {
 import { auth } from '@/lib/firebase'
 import axios from 'axios'
 
+const BACKEND_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://dbhive-api.onrender.com/api/v1'
+  : 'http://localhost:8002/api/v1'
+
 interface AuthContextType {
   user: User | null
   loading: boolean
@@ -42,7 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         try {
           // 백엔드에서 토큰 검증
-          const response = await axios.post('http://localhost:8001/api/v1/auth/verify-token', null, {
+          const response = await axios.post(`${BACKEND_URL}/auth/verify-token`, null, {
             headers: {
               Authorization: `Bearer ${token}`
             }
@@ -53,7 +57,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setError(null)
         } catch (error) {
           console.error('Token verification failed:', error)
-          setError('Authentication failed')
+          if (axios.isAxiosError(error)) {
+            setError(error.message)
+          } else {
+            setError('Authentication failed')
+          }
           await firebaseSignOut(auth)
         }
       } else {
@@ -69,10 +77,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setError(null)
       const provider = new GithubAuthProvider()
-      await signInWithPopup(auth, provider)
-    } catch (error) {
+      provider.setCustomParameters({
+        prompt: 'select_account'
+      })
+      const result = await signInWithPopup(auth, provider)
+      console.log('GitHub sign in successful:', result.user)
+    } catch (error: any) {
       console.error('GitHub sign in failed:', error)
-      setError('GitHub 로그인에 실패했습니다')
+      if (error.code === 'auth/cancelled-popup-request') {
+        setError('로그인 창이 닫혔습니다. 다시 시도해주세요.')
+      } else if (error.code === 'auth/popup-blocked') {
+        setError('팝업이 차단되었습니다. 팝업 차단을 해제해주세요.')
+      } else {
+        setError('GitHub 로그인에 실패했습니다')
+      }
     }
   }
 
