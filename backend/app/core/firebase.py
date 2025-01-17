@@ -13,26 +13,29 @@ logger = logging.getLogger(__name__)
 
 def format_private_key(key: str) -> str:
     """Format private key with proper line breaks and headers."""
-    # Remove any existing formatting
+    if not key:
+        return key
+        
+    # Remove all whitespace and special characters
+    key = ''.join(key.split())
     key = key.replace('\\n', '')
     key = key.replace('\n', '')
-    key = key.strip()
-    
-    # Remove surrounding quotes if present
-    if key.startswith('"') and key.endswith('"'):
-        key = key[1:-1]
-    
-    # Remove existing headers if present
+    key = key.replace('"', '')
     key = key.replace('-----BEGIN PRIVATE KEY-----', '')
     key = key.replace('-----END PRIVATE KEY-----', '')
-    key = key.strip()
+    
+    # Add a newline after the header and before the footer
+    formatted_key = '-----BEGIN PRIVATE KEY-----\n'
     
     # Insert a line break every 64 characters
-    key_parts = [key[i:i+64] for i in range(0, len(key), 64)]
-    formatted_key = '\n'.join(key_parts)
+    chunks = [key[i:i+64] for i in range(0, len(key), 64)]
+    formatted_key += '\n'.join(chunks)
     
-    # Add headers
-    return f"-----BEGIN PRIVATE KEY-----\n{formatted_key}\n-----END PRIVATE KEY-----"
+    # Add the footer with a leading newline
+    formatted_key += '\n-----END PRIVATE KEY-----'
+    
+    logger.info("Private key formatted with correct line breaks")
+    return formatted_key
 
 # Get environment variables
 project_id = os.getenv('FIREBASE_PROJECT_ID')

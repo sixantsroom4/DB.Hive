@@ -6,14 +6,16 @@
   package = "@netlify/plugin-nextjs"
 
 [build.environment]
-  NEXT_PUBLIC_FIREBASE_PROJECT_ID = "dbhive-5a328"
-  NEXT_PUBLIC_FIREBASE_PROJECT_NUMBER = "584587443157"
+  NEXT_PUBLIC_BACKEND_URL = "https://dbhive-api.onrender.com"
   NEXT_PUBLIC_FIREBASE_API_KEY = "AIzaSyC7GEu0N2hkFx-nxVq2OEJ35gPui7a3qW4"
   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN = "dbhive-5a328.firebaseapp.com"
+  NEXT_PUBLIC_FIREBASE_PROJECT_ID = "dbhive-5a328"
   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET = "dbhive-5a328.appspot.com"
+  NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID = "584587443157"
   NEXT_PUBLIC_FIREBASE_APP_ID = "1:584587443157:web:3a9b9b9b9b9b9b9b9b9b9b"
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
-  status = 200 
+  status = 200
+  force = true 
