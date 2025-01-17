@@ -1,6 +1,10 @@
 import os
+from dotenv import load_dotenv
 from firebase_admin import credentials, initialize_app, auth
 import logging
+
+# Load environment variables
+load_dotenv()
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -12,12 +16,15 @@ private_key = os.getenv('FIREBASE_PRIVATE_KEY')
 client_email = os.getenv('FIREBASE_CLIENT_EMAIL')
 client_x509_cert_url = os.getenv('FIREBASE_CLIENT_X509_CERT_URL')
 
+# Log environment variable status
+logger.info("Checking Firebase environment variables...")
+logger.info(f"PROJECT_ID: {'Set' if project_id else 'Missing'}")
+logger.info(f"PRIVATE_KEY: {'Set (length: ' + str(len(private_key)) + ')' if private_key else 'Missing'}")
+logger.info(f"CLIENT_EMAIL: {'Set' if client_email else 'Missing'}")
+
 # Check required environment variables
 if not all([project_id, private_key, client_email]):
     logger.error("Missing required Firebase environment variables")
-    logger.error(f"PROJECT_ID: {'Set' if project_id else 'Missing'}")
-    logger.error(f"PRIVATE_KEY: {'Set' if private_key else 'Missing'}")
-    logger.error(f"CLIENT_EMAIL: {'Set' if client_email else 'Missing'}")
     app = None
 else:
     try:
@@ -25,6 +32,8 @@ else:
         private_key = private_key.replace('\\n', '\n')
         
         logger.info(f"Initializing Firebase with project ID: {project_id}")
+        logger.info(f"Using client email: {client_email}")
+        
         cred = credentials.Certificate({
             "type": "service_account",
             "project_id": project_id,
@@ -42,7 +51,8 @@ else:
         logger.error(f"Error initializing Firebase: {str(e)}")
         # Log the first few characters of the private key for debugging
         if private_key:
-            logger.error(f"Private key starts with: {private_key[:50]}...")
+            logger.error(f"Private key format check - Starts with: {private_key[:50]}")
+            logger.error(f"Private key format check - Ends with: {private_key[-50:]}")
         app = None
 
 async def verify_firebase_token(token: str):
