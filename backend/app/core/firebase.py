@@ -1,5 +1,5 @@
 import os
-from firebase_admin import credentials, initialize_app
+from firebase_admin import credentials, initialize_app, auth
 import logging
 
 # Get environment variables
@@ -28,9 +28,14 @@ except Exception as e:
     app = None
 
 async def verify_firebase_token(token: str):
+    if app is None:
+        logging.error("Firebase app not initialized")
+        raise ValueError("Firebase authentication is not available")
+        
     try:
         decoded_token = auth.verify_id_token(token)
+        logging.info(f"Token verified successfully for user: {decoded_token.get('uid')}")
         return decoded_token
     except Exception as e:
-        print(f"Token verification error: {str(e)}")
+        logging.error(f"Token verification error: {str(e)}")
         raise ValueError(f"Invalid token: {str(e)}") 
