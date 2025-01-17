@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 from firebase_admin import credentials, initialize_app, auth
 import logging
+import re
 
 # Load environment variables
 load_dotenv()
@@ -9,6 +10,29 @@ load_dotenv()
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+def format_private_key(key: str) -> str:
+    """Format private key with proper line breaks and headers."""
+    # Remove any existing formatting
+    key = key.replace('\\n', '')
+    key = key.replace('\n', '')
+    key = key.strip()
+    
+    # Remove surrounding quotes if present
+    if key.startswith('"') and key.endswith('"'):
+        key = key[1:-1]
+    
+    # Remove existing headers if present
+    key = key.replace('-----BEGIN PRIVATE KEY-----', '')
+    key = key.replace('-----END PRIVATE KEY-----', '')
+    key = key.strip()
+    
+    # Insert a line break every 64 characters
+    key_parts = [key[i:i+64] for i in range(0, len(key), 64)]
+    formatted_key = '\n'.join(key_parts)
+    
+    # Add headers
+    return f"-----BEGIN PRIVATE KEY-----\n{formatted_key}\n-----END PRIVATE KEY-----"
 
 # Get environment variables
 project_id = os.getenv('FIREBASE_PROJECT_ID')
@@ -28,14 +52,9 @@ if not all([project_id, private_key, client_email]):
     app = None
 else:
     try:
-        # Clean and format private key
-        private_key = private_key.strip()
-        if private_key.startswith('"') and private_key.endswith('"'):
-            private_key = private_key[1:-1]
-        if not private_key.startswith('-----BEGIN PRIVATE KEY-----'):
-            private_key = '-----BEGIN PRIVATE KEY-----\n' + private_key
-        if not private_key.endswith('-----END PRIVATE KEY-----'):
-            private_key = private_key + '\n-----END PRIVATE KEY-----'
+        # Format the private key
+        private_key = format_private_key(private_key)
+        logger.info("Private key formatted successfully")
         
         logger.info(f"Initializing Firebase with project ID: {project_id}")
         logger.info(f"Using client email: {client_email}")
